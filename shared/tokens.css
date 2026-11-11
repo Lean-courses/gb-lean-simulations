@@ -1,48 +1,60 @@
 /*
- * Amcor design tokens — single source of truth.
+ * Design tokens — single source of truth.
  * Every color, radius, shadow and motion value used by the hub and its
  * simulations comes from here. Canvas code reads these via getComputedStyle.
+ *
+ * Palette harmonised with the Green Belt landing page (cream + burgundy), so
+ * following a link from there into a simulation does not feel like leaving
+ * the site. Status colors are deliberately NOT harmonised: they carry meaning
+ * and have to stay instantly distinguishable from each other and from chrome.
  */
 :root {
-  /* Brand */
-  --amcor-navy: #00395A;
-  --amcor-cyan: #00A1DE;
-  --amcor-teal: #1BCDAC;
-  --amcor-green: #00A551;
-  --amcor-gradient-stop: #24BBEE;
+  /* Brand — matches the landing page */
+  --brand-ink: #1f1e1d;
+  --brand-accent: #7a1f2b;        /* burgundy */
+  --brand-accent-deep: #5e141e;
+  --brand-accent-warm: #b4512f;   /* terracotta, second data hue */
+  --brand-accent-soft: #f4e9ea;
 
-  /* Navy ramp */
-  --navy-900: #001d2f;
-  --navy-800: #002d47;
-  --navy-700: #00395A;
-  --navy-600: #0a4d72;
-  --navy-500: #1a6691;
-  --navy-200: #b9d3e2;
-  --navy-100: #dcebf3;
-  --navy-050: #eef5f9;
+  /* Kept as aliases: older code and canvases still reference these names. */
+  --amcor-navy: var(--brand-ink);
+  --amcor-cyan: var(--brand-accent);
+  --amcor-teal: var(--brand-accent-warm);
+  --amcor-green: var(--color-success);
+  --amcor-gradient-stop: var(--brand-accent-warm);
 
-  /* Cyan ramp */
-  --cyan-700: #0079a8;
-  --cyan-600: #008cc4;
-  --cyan-500: #00A1DE;
-  --cyan-300: #6cccef;
-  --cyan-100: #cdeefb;
-  --cyan-050: #e8f7fd;
+  /* Ink ramp (was the navy ramp) */
+  --navy-900: #141312;
+  --navy-800: #1f1e1d;
+  --navy-700: #2b2926;
+  --navy-600: #3d3a37;
+  --navy-500: #55514b;
+  --navy-200: #cfc8bc;
+  --navy-100: #e6e2da;
+  --navy-050: #f2f0ea;
 
-  /* Blue-tinted neutrals */
+  /* Accent ramp (was the cyan ramp) */
+  --cyan-700: #5e141e;
+  --cyan-600: #7a1f2b;
+  --cyan-500: #93353f;
+  --cyan-300: #c99098;
+  --cyan-100: #f0dcde;
+  --cyan-050: #f4e9ea;
+
+  /* Warm neutrals (were blue-tinted) */
   --neutral-0: #ffffff;
-  --neutral-25: #f6f9fc;
-  --neutral-50: #eef4fa;
-  --neutral-100: #e0eaf3;
-  --neutral-200: #c7d7e6;
-  --neutral-300: #a6bdd2;
-  --neutral-400: #7892ab;
-  --neutral-500: #566f88;
-  --neutral-600: #3d5267;
-  --neutral-700: #2a3d4f;
+  --neutral-25: #fdfcfa;
+  --neutral-50: #faf9f7;
+  --neutral-100: #e6e2da;
+  --neutral-200: #d8d3c8;
+  --neutral-300: #bdb6a8;
+  --neutral-400: #8e877b;
+  --neutral-500: #6b6760;
+  --neutral-600: #55514b;
+  --neutral-700: #3d3a37;
 
   /* Signature gradient — accents only, never behind body text */
-  --gradient-signature: linear-gradient(90deg, #1BCDAC 0%, #24BBEE 50%, #00A1DE 100%);
+  --gradient-signature: linear-gradient(90deg, #b4512f 0%, #93353f 50%, #7a1f2b 100%);
 
   /* Semantic roles */
   --color-bg: var(--neutral-50);
@@ -50,38 +62,41 @@
   --color-surface-muted: var(--neutral-25);
   --color-text: var(--amcor-navy);
   --color-text-muted: var(--neutral-600);   /* 7.9:1 on white */
-  --color-text-subtle: var(--neutral-500);  /* 5.2:1 on white, 4.7:1 on bg */
+  --color-text-subtle: var(--neutral-500);  /* 5.6:1 on white, 5.3:1 on bg */
   --color-border: var(--neutral-100);
   --color-border-strong: var(--neutral-200);
-  --color-interactive: var(--amcor-cyan);
-  --color-interactive-strong: var(--cyan-600); /* non-text UI, ≥3:1 on white */
-  --color-link: var(--cyan-700);               /* text, 4.9:1 on white */
-  --color-focus: var(--amcor-cyan);
-  --color-primary: var(--amcor-navy);
-  --color-primary-hover: var(--navy-600);
+  --color-interactive: var(--brand-accent);
+  --color-interactive-strong: var(--brand-accent-deep); /* non-text UI */
+  --color-link: var(--brand-accent);           /* text, 10.2:1 on white */
+  --color-focus: var(--brand-accent);
+  --color-primary: var(--brand-accent);
+  --color-primary-hover: var(--brand-accent-deep);
   --color-on-primary: var(--neutral-0);
 
-  /* Status colors — reserved meanings, never decorative.
-     Orange and green fail AA as small text on white: use them for outlines,
-     markers and icons, with the label text in navy. Magenta passes (5.7:1). */
-  --color-bottleneck: #E98300;
-  --color-success: #00A551;
-  --color-danger: #C90062;
+  /* Status colors — reserved meanings, never decorative, and deliberately
+     NOT pulled toward the brand: a reader has to tell them apart at a glance.
+     Measured on white: amber 3.6:1 (outlines, markers and icons only — put the
+     label text in ink), green 8.0:1 and magenta 7.6:1 (both safe as text). */
+  --color-bottleneck: #c2740a;   /* amber, warmed to sit on cream */
+  --color-success: #1a5b43;      /* forest green, 7.6:1 on cream */
+  --color-danger: #a8004f;       /* magenta: the one hue no chrome uses */
   --color-danger-tint: #fbe6ef;
 
-  /* Simulation palette */
-  --sim-peg: var(--navy-200);
-  --sim-ball: var(--amcor-cyan);
-  --sim-ball-highlight: var(--amcor-teal);
-  --sim-ball-edge: var(--cyan-600);
-  --sim-curve: var(--amcor-navy);
+  /* Simulation palette. Three separable roles, not one accent repeated:
+     pegs and floor are warm grey furniture, the balls are the accent, and the
+     theoretical curve is ink so it reads as a reference, not as data. */
+  --sim-peg: var(--neutral-200);
+  --sim-ball: var(--brand-accent);
+  --sim-ball-highlight: var(--brand-accent-warm);
+  --sim-ball-edge: var(--brand-accent-deep);
+  --sim-curve: var(--brand-ink);
   --sim-grid: var(--neutral-100);
   --sim-divider: var(--neutral-200);
-  --sim-floor: var(--navy-200);
+  --sim-floor: var(--neutral-200);
   --sim-label: var(--neutral-500);
-  --sim-gradient-0: #1BCDAC;
-  --sim-gradient-50: #24BBEE;
-  --sim-gradient-100: #00A1DE;
+  --sim-gradient-0: #b4512f;
+  --sim-gradient-50: #93353f;
+  --sim-gradient-100: #7a1f2b;
 
   /* Typography — one typeface */
   --font-family-fallback: Arial, Helvetica, sans-serif;
@@ -113,8 +128,8 @@
   --radius-chip: 4px;
 
   /* Elevation */
-  --shadow-card: 0 8px 24px rgba(0, 57, 90, 0.08);
-  --shadow-card-hover: 0 12px 28px rgba(0, 57, 90, 0.13);
+  --shadow-card: 0 8px 24px rgba(31, 30, 29, 0.07);
+  --shadow-card-hover: 0 12px 28px rgba(31, 30, 29, 0.11);
 
   /* Motion */
   --ease-standard: cubic-bezier(.2, 0, .2, 1);
