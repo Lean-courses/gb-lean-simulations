@@ -50,7 +50,7 @@ LSS.config = { USE_BRAND_ASSETS: false, … }
 ## Structure
 
 ```
-index.html                 Home: renders cards from simulations/registry.js
+index.html                 Home: renders the simulation list from simulations/registry.js
 shared/                    Design tokens, base styles, i18n, header, icons, config, motion
 shared/sim/random.js       Seeded RNG and distributions shared by all simulation engines
 simulations/registry.js    List of simulations shown on Home

@@ -14,7 +14,7 @@
 
   <main id="main" class="page container">
     <h2 class="eyebrow" id="sims-heading" data-i18n="home.eyebrow"></h2>
-    <ul class="card-grid" id="sim-grid" aria-labelledby="sims-heading"></ul>
+    <ul class="sim-list" id="sim-list" aria-labelledby="sims-heading"></ul>
   </main>
 
   <footer id="site-footer"></footer>
@@ -32,7 +32,7 @@
       const { renderHeader, renderFooter } = LSS.header;
       const { icon } = LSS.icons;
       const { liveSimulations } = LSS.registry;
-      const grid = document.getElementById('sim-grid');
+      const list = document.getElementById('sim-list');
 
       const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
       const tagLabel = (id) => {
@@ -42,30 +42,34 @@
         return words.charAt(0).toUpperCase() + words.slice(1);
       };
 
-      function renderCards() {
+      function renderList() {
         const sims = liveSimulations();
         if (!sims.length) {
-          grid.innerHTML = `<li><p>${esc(t('home.empty'))}</p></li>`;
+          list.innerHTML = `<li><p>${esc(t('home.empty'))}</p></li>`;
           return;
         }
-        grid.innerHTML = sims.map((s) => `
-          <li>
-            <a class="card sim-card" href="${esc(s.path)}" data-keep-lang data-sim="${esc(s.id)}">
-              <div class="sim-card__media"><img src="${esc(s.thumbnail)}" alt="" width="320" height="180"></div>
-              <div class="sim-card__body">
-                <h3 class="sim-card__title">${esc(localize(s.title))}</h3>
-                <p class="sim-card__desc">${esc(localize(s.description))}</p>
-                ${s.tags.length ? `<ul class="chips">${s.tags.map((tag) => `<li class="chip">${esc(tagLabel(tag))}</li>`).join('')}</ul>` : ''}
-                <span class="sim-card__action">${esc(t('home.open'))}${icon('arrowRight', { size: 16 })}</span>
-              </div>
+        // Una fila por simulación: miniatura, título, una línea de descripción
+        // y los tags como texto corrido. La lista crece sin romperse.
+        list.innerHTML = sims.map((s) => `
+          <li class="sim-row">
+            <a class="sim-row__link" href="${esc(s.path)}" data-keep-lang data-sim="${esc(s.id)}">
+              <span class="sim-row__media">
+                <img src="${esc(s.thumbnail)}" alt="" width="320" height="180" loading="lazy" decoding="async">
+              </span>
+              <span class="sim-row__text">
+                <h3 class="sim-row__title">${esc(localize(s.title))}</h3>
+                <span class="sim-row__desc">${esc(localize(s.description))}</span>
+                ${s.tags.length ? `<span class="sim-row__tags">${s.tags.map((tag) => esc(tagLabel(tag))).join(' · ')}</span>` : ''}
+              </span>
+              <span class="sim-row__go" aria-hidden="true">${icon('arrowRight', { size: 18 })}</span>
             </a>
           </li>`).join('');
-        updateLinks(grid);
+        updateLinks(list);
       }
 
       renderHeader({ variant: 'home' });
       renderFooter();
-      onLangChange(renderCards);
+      onLangChange(renderList);
       initI18n();
     });
   </script>
