@@ -2,7 +2,7 @@
  * Push vs. Pull — two identical 2-step lines fed by the same demand stream.
  * Pure logic: no DOM access. Browser: LSS.PushPull. Node: module.exports.
  *
- *   Raw material → A → B → Finished goods (FG) → Customer
+ *   Supplier → A → B → Finished goods (FG) → Customer
  *
  * Wrong-mix inventory: time-average of finished goods of one SKU sitting on hand
  * while customers of the other SKU are waiting (backorders). It isolates the push
@@ -20,12 +20,12 @@
  *          unit. WIP + FG + cards in transit per SKU always equals N. Lowering N
  *          never destroys units: surplus cards are retired as they come back.
  *
- * Process times are deterministic (1 / capacity), plus an optional changeover
- * time when a process switches SKU. Demand per SKU arrives with gamma-distributed
- * inter-arrival times (mean from rate × mix, coefficient of variation cv).
- * Forecast per SKU is set at each planning tick from the demand rate in force at
- * that moment × (1 + bias) × (1 + noise·N(0,1)); demand events change real demand
- * immediately but reach the forecast only at the next planning tick.
+ * A released unit is an order on the supplier: it reaches Process A only after
+ * supplyLead minutes. Process times are deterministic (1 / capacity). Demand per
+ * SKU arrives with gamma-distributed inter-arrival times (mean from rate × mix,
+ * coefficient of variation cv). Forecast per SKU is set at each planning tick from
+ * the demand rate in force at that moment × (1 + bias) × (1 + noise·N(0,1)); demand
+ * events change real demand immediately but reach the forecast only at the next tick.
  */
 (function (root) {
   'use strict';
@@ -36,7 +36,15 @@
   const SKUS = 2;
   const HISTORY_STEP = 0.5;       // minutes between inventory samples
   const HISTORY_MINUTES = 120;
-  const EVENT_MINUTES = 10;       // duration of spike / drop events
+
+  /** Scenario events. Each one is a sustained change: it stays until 'baseline'. */
+  const EVENTS = {
+    demandUp: 1.3,     // total demand × 1.3
+    demandDown: 0.6,   // total demand × 0.6
+    mix: 0.3,          // share of SKU 1 (baseline 0.6)
+    supplyUp: 5,       // supplier lead time, minutes (baseline 1)
+    baseline: null,    // back to the parameter values
+  };
 
   const DEFAULTS = {
     demandRate: 1.0,       // total units/min
@@ -44,19 +52,18 @@
     mix: 0.6,              // share of SKU 1
     bias: 0,               // forecast bias (0.3 = +30%)
     noise: 0.1,            // forecast noise (std. dev. as a fraction)
-    capA: 1.4,
-    capB: 1.3,
-    changeover: false,
-    changeoverTime: 0.3,   // minutes, when a process switches SKU
+    capA: 1.6,
+    capB: 1.5,
+    supplyLead: 1,         // minutes from release to arrival at process A
     period: 10,            // planning period (minutes)
-    safety: 3,             // push safety stock, in minutes of forecast demand
+    safety: 5,             // push safety stock, in minutes of forecast demand
     cards: [4, 3],         // pull kanban cards per SKU
     cardDelay: 1,          // minutes for a card to travel back upstream
     initialFG: null,       // FG per SKU at t = 0 (defaults to the card counts)
     holdCost: 1,           // illustrative
     backorderCost: 5,      // illustrative
     autoRelease: true,     // false in Game mode: push releases are manual
-    schedule: [],          // [{ t, type, value? }] demand events fired automatically
+    schedule: [],          // [{ t, type, value? }] scenario events fired automatically
     seed: 20240601,
   };
 
@@ -66,9 +73,10 @@
       this.policy = policy;
       this.sim = sim;
       const p = sim.params;
+      this.inbound = [];                 // { u, arrive } released, still at the supplier
       this.qA = [];
       this.qB = [];
-      this.st = [{ unit: null, end: Infinity, last: -1, start: 0 }, { unit: null, end: Infinity, last: -1, start: 0 }];
+      this.st = [{ unit: null, end: Infinity, start: 0 }, { unit: null, end: Infinity, start: 0 }];
       this.fg = [[], []];
       this.backlog = [0, 0];
       this.cardsInTransit = [];          // { sku, depart, arrive } in arrival order
@@ -103,6 +111,7 @@
 
     wip(s) {
       let n = 0;
+      for (const x of this.inbound) if (x.u.sku === s) n++;
       for (const u of this.qA) if (u.sku === s) n++;
       for (const u of this.qB) if (u.sku === s) n++;
       for (const x of this.st) if (x.unit && x.unit.sku === s) n++;
@@ -112,8 +121,19 @@
     inventory(s) { return this.wip(s) + this.fg[s].length; }
 
     /* ----- release rules ----- */
+    /** A released unit becomes an order on the supplier and arrives supplyLead later. */
+    admit(u, t) {
+      const lead = this.sim.params.supplyLead;
+      if (lead > 0) {
+        this.inbound.push({ u, arrive: t + lead });
+        this.inbound.sort((a, b) => a.arrive - b.arrive);
+      } else {
+        this.qA.push(u);
+      }
+    }
+
     release(s, qty, t) {
-      for (let k = 0; k < qty; k++) this.qA.push(this.makeUnit(s, NaN, t));
+      for (let k = 0; k < qty; k++) this.admit(this.makeUnit(s, NaN, t), t);
       this.released[s] += qty;
       this.tryStart(0, t);
     }
@@ -140,12 +160,7 @@
         for (let k = 0; k < qty[s]; k++) order.push([(have + k) / r, s]);
       }
       order.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-      if (this.sim.params.changeover) {
-        // With changeovers, run each SKU as one campaign, most urgent SKU first.
-        const first = order.length ? order[0][1] : 0;
-        order.sort((a, b) => (a[1] === first ? 0 : 1) - (b[1] === first ? 0 : 1) || a[0] - b[0]);
-      }
-      for (const [, s] of order) this.qA.push(this.makeUnit(s, NaN, t));
+      for (const [, s] of order) this.admit(this.makeUnit(s, NaN, t), t);
       for (let s = 0; s < SKUS; s++) this.released[s] += qty[s];
       this.tryStart(0, t);
       this.lastRelease = { t, qty: qty.slice() };
@@ -179,12 +194,9 @@
       const u = q.shift();
       const p = this.sim.params;
       const cap = i === 0 ? p.capA : p.capB;
-      const setup = p.changeover && x.last >= 0 && x.last !== u.sku ? p.changeoverTime : 0;
       x.unit = u;
       x.start = t;
-      x.setup = setup;
-      x.end = t + setup + 1 / cap;
-      x.last = u.sku;
+      x.end = t + 1 / cap;
     }
 
     finish(i, t) {
@@ -233,11 +245,17 @@
 
     nextEvent() {
       let t = Math.min(this.st[0].end, this.st[1].end);
+      if (this.inbound.length && this.inbound[0].arrive < t) t = this.inbound[0].arrive;
       if (this.cardsInTransit.length && this.cardsInTransit[0].arrive < t) t = this.cardsInTransit[0].arrive;
       return t;
     }
 
     handle(t) {
+      if (this.inbound.length && this.inbound[0].arrive <= t) {
+        this.qA.push(this.inbound.shift().u);
+        this.tryStart(0, t);
+        return;
+      }
       if (this.cardsInTransit.length && this.cardsInTransit[0].arrive <= t) {
         const c = this.cardsInTransit.shift();
         this.release(c.sku, 1, t);
@@ -334,8 +352,8 @@
       this.forecastSample = makeSampler(mulberry32(seed ^ 0xC2B2AE35));
       this.t = 0;
       this.rateFactor = 1;
-      this.eventEnd = Infinity;
       this.mixNow = this.params.mix;
+      this.baseSupplyLead = this.params.supplyLead;
       this.events = [];                  // { t, type } for chart markers
       this.demandLog = [];               // [t, sku] (for tests)
       this.keepDemandLog = Boolean(params.keepDemandLog);
@@ -371,18 +389,25 @@
       this.nextPlan = t + p.period;
     }
 
-    /** Demand events: 'spike' (+50% for 10 min), 'drop' (−50%), 'mix' (persistent shift), 'baseline'. */
+    /**
+     * Scenario events, all sustained until 'baseline':
+     *   demandUp / demandDown — total demand × factor
+     *   mix                   — new share for SKU 1
+     *   supplyUp              — new supplier lead time, in minutes
+     *   baseline              — back to the parameter values
+     */
     applyEvent(type, value) {
       const t = this.t;
-      if (type === 'spike' || type === 'drop') {
-        this.rateFactor = type === 'spike' ? 1.5 : 0.5;
-        this.eventEnd = t + EVENT_MINUTES;
-      } else if (type === 'mix') {
-        this.mixNow = value !== undefined ? value : this.params.mix / 2; // default: SKU 1 share halves (60/40 → 30/70)
-      } else if (type === 'baseline') {
+      const v = value !== undefined ? value : EVENTS[type];
+      if (type === 'demandUp' || type === 'demandDown') this.rateFactor = v;
+      else if (type === 'mix') this.mixNow = v;
+      else if (type === 'supplyUp') this.params.supplyLead = v;
+      else if (type === 'baseline') {
         this.rateFactor = 1;
-        this.eventEnd = Infinity;
         this.mixNow = this.params.mix;
+        this.params.supplyLead = this.baseSupplyLead;
+      } else {
+        return;
       }
       this.events.push({ t, type });
       this.redrawDemand();
@@ -392,7 +417,7 @@
       this.nextDemand = [this.drawInterarrival(0), this.drawInterarrival(1)];
     }
 
-    /** Add a demand event to fire at time t (Game mode hidden events). */
+    /** Add a scenario event to fire at time t (Game mode hidden events). */
     scheduleEvent(ev) {
       this.schedule.push(ev);
       this.schedule.sort((a, b) => a.t - b.t);
@@ -406,6 +431,7 @@
         this.lines.pull.setCards(this.params.cards, this.t);
       }
       if ('mix' in partial) this.mixNow = partial.mix;
+      if ('supplyLead' in partial) this.baseSupplyLead = partial.supplyLead;
       if ('demandRate' in partial || 'cv' in partial || 'mix' in partial) this.redrawDemand();
     }
 
@@ -418,9 +444,9 @@
       if (!(target > this.t)) return;
       const lines = [this.lines.push, this.lines.pull];
       for (;;) {
-        // earliest event across demand, planning, event end and both lines
+        // earliest event across demand, planning, scenario events and both lines
         const sched = this.schedule.length ? this.schedule[0].t : Infinity;
-        let next = Math.min(this.nextDemand[0], this.nextDemand[1], this.nextPlan, this.eventEnd, sched);
+        let next = Math.min(this.nextDemand[0], this.nextDemand[1], this.nextPlan, sched);
         let lineNext = [lines[0].nextEvent(), lines[1].nextEvent()];
         next = Math.min(next, lineNext[0], lineNext[1]);
         if (next > target) break;
@@ -436,12 +462,6 @@
         if (sched <= next) {
           const ev = this.schedule.shift();
           this.applyEvent(ev.type, ev.value);
-          continue;
-        }
-        if (this.eventEnd <= next) {
-          this.rateFactor = 1;
-          this.eventEnd = Infinity;
-          this.redrawDemand();
           continue;
         }
         const s = this.nextDemand[0] <= this.nextDemand[1] ? 0 : 1;
@@ -466,7 +486,7 @@
     }
   }
 
-  const api = { PushPullSim, Line, DEFAULTS, SKUS, EVENT_MINUTES, HISTORY_MINUTES };
+  const api = { PushPullSim, Line, DEFAULTS, EVENTS, SKUS, HISTORY_MINUTES };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (root && root.LSS) root.LSS.PushPull = api;
 })(typeof window !== 'undefined' ? window : globalThis);
