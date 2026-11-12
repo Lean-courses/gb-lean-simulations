@@ -33,7 +33,7 @@
 }
 .eq__gloss { font-size: var(--font-size-xs); color: var(--color-text-subtle); }
 .eq__sub { font-size: var(--font-size-sm); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
-.eq__op { align-self: center; font-size: 2rem; color: var(--neutral-400); padding-top: var(--space-5); }
+.eq__op { align-self: center; font-size: 2rem; color: var(--neutral-500); padding-top: var(--space-5); }
 @media (min-width: 720px) {
   .eq__name { font-size: var(--font-size-xl); }
   .eq__value { font-size: 3rem; }
