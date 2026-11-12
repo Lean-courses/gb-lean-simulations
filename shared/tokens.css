@@ -3,100 +3,109 @@
  * Every color, radius, shadow and motion value used by the hub and its
  * simulations comes from here. Canvas code reads these via getComputedStyle.
  *
- * Palette harmonised with the Green Belt landing page (cream + burgundy), so
- * following a link from there into a simulation does not feel like leaving
- * the site. Status colors are deliberately NOT harmonised: they carry meaning
- * and have to stay instantly distinguishable from each other and from chrome.
+ * Palette: green, slate grey and white. Green carries interaction and the
+ * "good" status; the greys carry everything else. Data is deliberately slate,
+ * not green, so a chart never competes with a button for the reader's eye and
+ * "this is the better line" stays the only green thing on a canvas.
+ *
+ * Contrast measured against white / #fafafa page / #f0f4f8 band:
+ *   ink 14.5 / 13.9 / 13.1      muted 7.5 / 7.2 / 6.8
+ *   subtle 4.9 / 4.7 / 4.4      link green 5.0 / 4.8 / 4.5
+ * The vivid green is a fill, never text: white on it is 2.1:1, so the primary
+ * button carries ink text instead (6.9:1).
  */
 :root {
-  /* Brand — matches the landing page */
-  --brand-ink: #1f1e1d;
-  --brand-accent: #7a1f2b;        /* burgundy */
-  --brand-accent-deep: #5e141e;
-  --brand-accent-warm: #b4512f;   /* terracotta, second data hue */
-  --brand-accent-soft: #f4e9ea;
+  /* Brand */
+  --brand-ink: #032c46;           /* deep slate, 14.5:1 on white */
+  --brand-accent: #10cd73;        /* vivid green — fills and marks, never text */
+  --brand-accent-deep: #078049;   /* the green that is safe as text, 5.0:1 */
+  --brand-accent-dark: #065f3c;   /* pressed states, white text 7.8:1 */
+  --brand-accent-soft: #eafaf2;
 
-  /* Kept as aliases: older code and canvases still reference these names. */
+  /* Kept as aliases: older code and canvases still reference these names.
+     Note --amcor-cyan is the DATA hue and is slate, not green, on purpose. */
   --amcor-navy: var(--brand-ink);
-  --amcor-cyan: var(--brand-accent);
-  --amcor-teal: var(--brand-accent-warm);
+  --amcor-cyan: var(--navy-600);
+  --amcor-teal: var(--navy-500);
   --amcor-green: var(--color-success);
-  --amcor-gradient-stop: var(--brand-accent-warm);
+  --amcor-gradient-stop: var(--brand-accent);
 
-  /* Ink ramp (was the navy ramp) */
-  --navy-900: #141312;
-  --navy-800: #1f1e1d;
-  --navy-700: #2b2926;
-  --navy-600: #3d3a37;
-  --navy-500: #55514b;
-  --navy-200: #cfc8bc;
-  --navy-100: #e6e2da;
-  --navy-050: #f2f0ea;
+  /* Ink / slate ramp */
+  --navy-900: #021c2d;
+  --navy-800: #032c46;
+  --navy-700: #0f3c55;
+  --navy-600: #3e5868;
+  --navy-500: #5c7484;
+  --navy-200: #c6d2da;
+  --navy-100: #dfe8ee;
+  --navy-050: #f0f4f8;
 
-  /* Accent ramp (was the cyan ramp) */
-  --cyan-700: #5e141e;
-  --cyan-600: #7a1f2b;
-  --cyan-500: #93353f;
-  --cyan-300: #c99098;
-  --cyan-100: #f0dcde;
-  --cyan-050: #f4e9ea;
+  /* Accent ramp (green) */
+  --cyan-700: #065f3c;
+  --cyan-600: #078049;
+  --cyan-500: #10cd73;
+  --cyan-300: #6fe0ac;
+  --cyan-100: #d7f6e6;
+  --cyan-050: #eafaf2;
 
-  /* Warm neutrals (were blue-tinted) */
+  /* Cool neutrals */
   --neutral-0: #ffffff;
-  --neutral-25: #fdfcfa;
-  --neutral-50: #faf9f7;
-  --neutral-100: #e6e2da;
-  --neutral-200: #d8d3c8;
-  --neutral-300: #bdb6a8;
-  --neutral-400: #8e877b;
-  --neutral-500: #6b6760;
-  --neutral-600: #55514b;
-  --neutral-700: #3d3a37;
+  --neutral-25: #fafafa;
+  --neutral-50: #f5f8fa;
+  --neutral-100: #e6ecf0;
+  --neutral-200: #d7dfe5;
+  --neutral-300: #b9c4cb;
+  --neutral-400: #8fa3ae;
+  --neutral-500: #5c7484;
+  --neutral-600: #3e5868;
+  --neutral-700: #0f3c55;
 
   /* Signature gradient — accents only, never behind body text */
-  --gradient-signature: linear-gradient(90deg, #b4512f 0%, #93353f 50%, #7a1f2b 100%);
+  --gradient-signature: linear-gradient(90deg, #10cd73 0%, #078049 55%, #0f3c55 100%);
 
   /* Semantic roles */
-  --color-bg: var(--neutral-50);
+  --color-bg: var(--neutral-25);
   --color-surface: var(--neutral-0);
-  --color-surface-muted: var(--neutral-25);
-  --color-text: var(--amcor-navy);
-  --color-text-muted: var(--neutral-600);   /* 7.9:1 on white */
-  --color-text-subtle: var(--neutral-500);  /* 5.6:1 on white, 5.3:1 on bg */
+  --color-surface-muted: var(--neutral-50);
+  --color-text: var(--brand-ink);
+  --color-text-muted: var(--neutral-600);   /* 7.5:1 on white */
+  --color-text-subtle: var(--neutral-500);  /* 4.9:1 on white, 4.7:1 on bg */
   --color-border: var(--neutral-100);
   --color-border-strong: var(--neutral-200);
-  --color-interactive: var(--brand-accent);
-  --color-interactive-strong: var(--brand-accent-deep); /* non-text UI */
-  --color-link: var(--brand-accent);           /* text, 10.2:1 on white */
-  --color-focus: var(--brand-accent);
-  --color-primary: var(--brand-accent);
-  --color-primary-hover: var(--brand-accent-deep);
-  --color-on-primary: var(--neutral-0);
+  --color-interactive: var(--brand-accent-deep);
+  --color-interactive-strong: var(--brand-accent-dark); /* non-text UI */
+  --color-link: var(--brand-accent-deep);      /* text, 5.0:1 on white */
+  --color-focus: var(--brand-accent-deep);
+  --color-primary: var(--brand-accent);        /* fill */
+  --color-primary-hover: #0ea55e;              /* ink on it still 4.5:1 */
+  --color-on-primary: var(--brand-ink);        /* 6.9:1 on the vivid green */
 
-  /* Status colors — reserved meanings, never decorative, and deliberately
-     NOT pulled toward the brand: a reader has to tell them apart at a glance.
-     Measured on white: amber 3.6:1 (outlines, markers and icons only — put the
-     label text in ink), green 8.0:1 and magenta 7.6:1 (both safe as text). */
-  --color-bottleneck: #c2740a;   /* amber, warmed to sit on cream */
-  --color-success: #1a5b43;      /* forest green, 7.6:1 on cream */
+  /* Status colors — reserved meanings, never decorative. In a green brand
+     "good" shares the brand hue by design, but it is a darker value than the
+     CTA green and it is the only green allowed on a canvas. Amber and magenta
+     stay off-brand so three states never blur into one another.
+     Measured on white: amber 4.2:1 (outlines, markers and icons only — put the
+     label text in ink), green 5.4:1 and magenta 7.6:1 (both safe as text). */
+  --color-bottleneck: #b46a00;   /* amber */
+  --color-success: #077a46;      /* green, darker than the CTA fill */
   --color-danger: #a8004f;       /* magenta: the one hue no chrome uses */
   --color-danger-tint: #fbe6ef;
 
   /* Simulation palette. Three separable roles, not one accent repeated:
-     pegs and floor are warm grey furniture, the balls are the accent, and the
+     pegs and floor are grey furniture, the balls are the accent, and the
      theoretical curve is ink so it reads as a reference, not as data. */
   --sim-peg: var(--neutral-200);
   --sim-ball: var(--brand-accent);
-  --sim-ball-highlight: var(--brand-accent-warm);
+  --sim-ball-highlight: var(--cyan-300);
   --sim-ball-edge: var(--brand-accent-deep);
   --sim-curve: var(--brand-ink);
   --sim-grid: var(--neutral-100);
   --sim-divider: var(--neutral-200);
   --sim-floor: var(--neutral-200);
   --sim-label: var(--neutral-500);
-  --sim-gradient-0: #b4512f;
-  --sim-gradient-50: #93353f;
-  --sim-gradient-100: #7a1f2b;
+  --sim-gradient-0: #10cd73;
+  --sim-gradient-50: #078049;
+  --sim-gradient-100: #0f3c55;
 
   /* Typography — one typeface */
   --font-family-fallback: Arial, Helvetica, sans-serif;
@@ -128,8 +137,8 @@
   --radius-chip: 4px;
 
   /* Elevation */
-  --shadow-card: 0 8px 24px rgba(31, 30, 29, 0.07);
-  --shadow-card-hover: 0 12px 28px rgba(31, 30, 29, 0.11);
+  --shadow-card: 0 8px 24px rgba(3, 44, 70, 0.07);
+  --shadow-card-hover: 0 12px 28px rgba(3, 44, 70, 0.12);
 
   /* Motion */
   --ease-standard: cubic-bezier(.2, 0, .2, 1);

@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" width="320" height="180" aria-hidden="true">
-  <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#b4512f"/><stop offset=".5" stop-color="#93353f"/><stop offset="1" stop-color="#7a1f2b"/></linearGradient></defs>
+  <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#10cd73"/><stop offset=".5" stop-color="#5c7484"/><stop offset="1" stop-color="#3e5868"/></linearGradient></defs>
   <rect width="320" height="180" fill="#ffffff"/>
   <rect x="0" y="0" width="320" height="4" fill="url(#g)"/>
-  <text x="160" y="42" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#1f1e1d">WIP = TH × LT</text>
-  <line x1="24" y1="112" x2="300" y2="112" stroke="#d8d3c8" stroke-width="2"/>
-  <rect x="16" y="98" width="28" height="28" rx="5" fill="#fff" stroke="#d8d3c8" stroke-width="1.5" stroke-dasharray="4 3"/>
-  <g fill="#7a1f2b">
+  <text x="160" y="42" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#032c46">WIP = TH × LT</text>
+  <line x1="24" y1="112" x2="300" y2="112" stroke="#d7dfe5" stroke-width="2"/>
+  <rect x="16" y="98" width="28" height="28" rx="5" fill="#fff" stroke="#d7dfe5" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <g fill="#3e5868">
     <rect x="58" y="100" width="9" height="9" rx="2"/><rect x="58" y="113" width="9" height="9" rx="2"/>
     <rect x="130" y="94" width="9" height="9" rx="2"/><rect x="130" y="107" width="9" height="9" rx="2"/><rect x="130" y="120" width="9" height="9" rx="2"/>
     <rect x="118" y="94" width="9" height="9" rx="2"/><rect x="118" y="107" width="9" height="9" rx="2"/><rect x="118" y="120" width="9" height="9" rx="2"/>
@@ -13,16 +13,16 @@
     <rect x="276" y="96" width="9" height="9" rx="2"/><rect x="288" y="96" width="9" height="9" rx="2"/><rect x="276" y="108" width="9" height="9" rx="2"/><rect x="288" y="108" width="9" height="9" rx="2"/><rect x="276" y="120" width="9" height="9" rx="2"/>
   </g>
   <g fill="#fff" stroke-width="1.5">
-    <rect x="72" y="94" width="36" height="36" rx="5" stroke="#d8d3c8"/>
-    <rect x="144" y="94" width="36" height="36" rx="5" stroke="#c2740a" stroke-width="2.5"/>
-    <rect x="216" y="94" width="36" height="36" rx="5" stroke="#d8d3c8"/>
+    <rect x="72" y="94" width="36" height="36" rx="5" stroke="#d7dfe5"/>
+    <rect x="144" y="94" width="36" height="36" rx="5" stroke="#b46a00" stroke-width="2.5"/>
+    <rect x="216" y="94" width="36" height="36" rx="5" stroke="#d7dfe5"/>
   </g>
   <g fill="none" stroke-width="3" stroke-linecap="round">
-    <circle cx="90" cy="112" r="11" stroke="#e6e2da"/><path d="M90 101 a11 11 0 0 1 10.5 14" stroke="#5e141e"/>
-    <circle cx="162" cy="112" r="11" stroke="#e6e2da"/><path d="M162 101 a11 11 0 1 1 -9 17" stroke="#5e141e"/>
-    <circle cx="234" cy="112" r="11" stroke="#e6e2da"/><path d="M234 101 a11 11 0 0 1 0 22" stroke="#5e141e"/>
+    <circle cx="90" cy="112" r="11" stroke="#e6ecf0"/><path d="M90 101 a11 11 0 0 1 10.5 14" stroke="#0f3c55"/>
+    <circle cx="162" cy="112" r="11" stroke="#e6ecf0"/><path d="M162 101 a11 11 0 1 1 -9 17" stroke="#0f3c55"/>
+    <circle cx="234" cy="112" r="11" stroke="#e6ecf0"/><path d="M234 101 a11 11 0 0 1 0 22" stroke="#0f3c55"/>
   </g>
-  <g fill="#7a1f2b"><rect x="85.5" y="107.5" width="9" height="9" rx="2"/><rect x="157.5" y="107.5" width="9" height="9" rx="2"/><rect x="229.5" y="107.5" width="9" height="9" rx="2"/></g>
-  <polyline points="24,168 60,160 96,162 132,150 168,154 204,146 240,149 276,144 300,146" fill="none" stroke="#7a1f2b" stroke-width="1.5"/>
-  <line x1="24" y1="152" x2="300" y2="152" stroke="#1f1e1d" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <g fill="#3e5868"><rect x="85.5" y="107.5" width="9" height="9" rx="2"/><rect x="157.5" y="107.5" width="9" height="9" rx="2"/><rect x="229.5" y="107.5" width="9" height="9" rx="2"/></g>
+  <polyline points="24,168 60,160 96,162 132,150 168,154 204,146 240,149 276,144 300,146" fill="none" stroke="#3e5868" stroke-width="1.5"/>
+  <line x1="24" y1="152" x2="300" y2="152" stroke="#032c46" stroke-width="1.5" stroke-dasharray="5 4"/>
 </svg>
