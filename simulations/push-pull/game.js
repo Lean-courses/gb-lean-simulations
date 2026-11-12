@@ -16,10 +16,10 @@
   const ROUNDS = 6;
   const ROUND_MIN = 10;
   const CARD_ROUNDS = [1, 4];
-  const EVENT_TYPES = ['spike', 'drop', 'mix'];
+  const EVENT_TYPES = ['demandUp', 'demandDown', 'mix', 'supplyUp'];
   const GAME_PARAMS = {
-    demandRate: 1.0, cv: 0.5, mix: 0.6, bias: 0, noise: 0.2, capA: 1.4, capB: 1.3,
-    changeover: false, period: ROUND_MIN, safety: 5, cards: [4, 3], holdCost: 1, backorderCost: 5,
+    demandRate: 1.0, cv: 0.5, mix: 0.6, bias: 0, noise: 0.2, capA: 1.6, capB: 1.5,
+    supplyLead: 1, period: ROUND_MIN, safety: 5, cards: [5, 4], holdCost: 1, backorderCost: 5,
     autoRelease: false,
   };
 
@@ -57,6 +57,8 @@
       return S.events.map((type, i) => (type ? { t: i * ROUND_MIN + 0.01, type } : null)).filter(Boolean);
     }
 
+    const eventName = (type) => t(`pp.events.${type}`);
+
     function start() {
       S.round = 1;
       S.cards = GAME_PARAMS.cards.slice();
@@ -87,7 +89,7 @@
       sim.lines.push.manualRelease(qty, sim.t);
       S.releases.push(qty);
       if (CARD_ROUNDS.includes(S.round)) {
-        S.cards = [read('card0', 1, 20), read('card1', 1, 20)];
+        S.cards = [read('card0', 1, 25), read('card1', 1, 25)];
         sim.setParams({ cards: S.cards });
       }
       S.stage = 'running';
@@ -174,7 +176,7 @@
         ? `<p class="game-note">${esc(t('pp.game.cardsNow'))}</p>
           <table class="game-table"><thead><tr><th scope="col">${esc(t('pp.game.sku'))}</th><th scope="col">${esc(t('pp.game.fg'))}</th><th scope="col">${esc(t('pp.game.cards'))}</th></tr></thead><tbody>
           ${[0, 1].map((s) => `<tr><th scope="row">${skuName(s)}</th><td>${esc(fmtInt(Q.fgCount(s)))}</td>
-            <td><input class="num-input" type="number" name="card${s}" min="1" max="20" step="1" value="${S.cards[s]}" aria-label="${esc(t('pp.game.cardsAria', { sku: t(`pp.legend.sku${s + 1}`) }))}"></td></tr>`).join('')}
+            <td><input class="num-input" type="number" name="card${s}" min="1" max="25" step="1" value="${S.cards[s]}" aria-label="${esc(t('pp.game.cardsAria', { sku: t(`pp.legend.sku${s + 1}`) }))}"></td></tr>`).join('')}
           </tbody></table>
           <p class="game-note">${esc(t('pp.note.sizingShort'))}</p>`
         : `<p>${esc(t('pp.game.pullAuto', { a: fmtInt(S.cards[0]), b: fmtInt(S.cards[1]) }))}</p>`;
@@ -236,7 +238,7 @@
         const mark = `<span class="better-mark">${icon('check', { size: 14 })}</span><span class="sr-only">${esc(t('pp.compare.better'))}</span>`;
         return `<tr><th scope="row">${esc(t(`pp.kpi.${k.key}Long`))}</th><td>${w === 'push' ? mark : ''}${esc(k.fmt(a))}</td><td>${w === 'pull' ? mark : ''}${esc(k.fmt(b))}</td></tr>`;
       }).join('');
-      const events = S.events.map((e, i) => (e ? t('pp.game.eventAt', { r: fmtInt(i + 1), e: t(`pp.events.${e}`) }) : null)).filter(Boolean);
+      const events = S.events.map((e, i) => (e ? t('pp.game.eventAt', { r: fmtInt(i + 1), e: eventName(e) }) : null)).filter(Boolean);
       return `<div class="game-body">
         <div class="game-grid">
           <div class="game-box">
@@ -270,7 +272,7 @@
     }
 
     function facilitatorView() {
-      const opts = (r) => ['none', ...EVENT_TYPES].map((e) => `<option value="${e}" ${(S.events[r] || 'none') === e ? 'selected' : ''}>${esc(e === 'none' ? t('pp.game.noEvent') : t(`pp.events.${e}`))}</option>`).join('');
+      const opts = (r) => ['none', ...EVENT_TYPES].map((e) => `<option value="${e}" ${(S.events[r] || 'none') === e ? 'selected' : ''}>${esc(e === 'none' ? t('pp.game.noEvent') : eventName(e))}</option>`).join('');
       return `<div class="facilitator">
         <button type="button" class="link-btn" id="fac-toggle" aria-expanded="${S.facilitatorOpen}" aria-controls="fac-body">${esc(t('pp.game.facilitator'))}</button>
         <span class="game-note"> · ${esc(t('pp.seed', { seed: String(S.seed) }))}</span>

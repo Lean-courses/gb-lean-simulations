@@ -6,7 +6,7 @@ A hub of small, interactive simulations that make core Lean Six Sigma concepts v
 |---|---|
 | **Galton Board** | Variation and the normal distribution |
 | **Little's Law: 3-process line** | WIP = Throughput × Lead time, how each term is measured, bottlenecks and overload |
-| **Push vs. Pull: planning game** | Forecast-driven (MRP) vs. kanban release, card sizing; Explore mode and a 6-round classroom game with facilitator seed |
+| **Push vs. Pull: planning game** | Forecast-driven (MRP) vs. kanban release, card sizing; five named scenarios (stable demand, demand surge, demand drop, mix shift, slower supplier) and a 6-round classroom game with facilitator seed |
 
 **Live site:** https://drotondi.github.io/GreenBelt/
 
@@ -68,12 +68,14 @@ Simulation engines have dependency-free unit tests:
 
 ```sh
 node simulations/littles-law/engine.test.js   # hand-calculated cases, Little within 5%, M/M/1, CONWIP cap (engine)
-node simulations/push-pull/engine.test.js     # card cap, identical demand stream, 100% fill with CV 0, bias, mix shift
+node simulations/push-pull/engine.test.js     # card cap, identical demand stream, 100% fill with CV 0, bias, mix shift, supplier lead time
 ```
 
 ## Push vs. Pull in class
 
-Open the simulation, switch to **Game**, open **Facilitator** and share the seed: everyone who enters the same seed plays the same hidden demand events. Tick **Hide KPIs until the end** so candidates decide without live results. Costs are illustrative (holding 1, backorder 5), not Amcor figures.
+**Explore** runs five named scenarios. All five start from the same stable line and change one single thing at minute 20: stable demand (nothing changes), demand surge (+30%), demand drop (−40%), mix shift (60/40 → 30/70) and slower supplier (lead time 1 → 5 min). Four levers react to them while the line runs — demand variability, push safety stock, push forecast bias, kanban cards and supplier lead time — so a candidate picks a scenario, watches both lines fail or cope, then tries to fix it. **Reset** (or `R`) replays the same scenario with the levers as they are.
+
+**Game** is unchanged in shape: switch to it, open **Facilitator** and share the seed — everyone who enters the same seed plays the same hidden events, now drawn from the same four scenario events. Tick **Hide KPIs until the end** so candidates decide without live results. Costs are illustrative (holding 1, backorder 5), not Amcor figures.
 
 ## How to add a new simulation
 

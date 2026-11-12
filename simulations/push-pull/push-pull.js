@@ -25,46 +25,38 @@
   const FLASH_MS = 320;
 
   const BASE = {
-    demandRate: 1.0, cv: 0.5, mix: 0.6, bias: 0, noise: 0.1, capA: 1.4, capB: 1.3,
-    changeover: false, period: 10, safety: 5, cards: [4, 3], holdCost: 1, backorderCost: 5,
+    demandRate: 1.0, cv: 0.5, mix: 0.6, bias: 0, noise: 0.1, capA: 1.6, capB: 1.5,
+    supplyLead: 1, period: 10, safety: 5, cards: [5, 4], holdCost: 1, backorderCost: 5,
     autoRelease: true, schedule: [],
   };
-  const PRESETS = [
-    { key: 'p1', params: { noise: 0, safety: 6 } },
-    { key: 'p2', params: { bias: 0.3, cards: [5, 4] } },
-    { key: 'p3', params: { cards: [5, 4], schedule: [{ t: 30.5, type: 'mix' }] } },
-    { key: 'p4', params: { cards: [1, 1] } },
-    { key: 'p5', params: { noise: 0, safety: 6, cards: [15, 12] } },
+
+  // Scenarios: the same baseline line, disturbed once at minute 20 (just after the
+  // planning tick, so the push forecast cannot see the change coming).
+  const EVENT_AT = 20.01;
+  const EVENT_MIN = 20;
+  const SCENARIOS = [
+    { key: 's1', event: null },
+    { key: 's2', event: 'demandUp' },
+    { key: 's3', event: 'demandDown' },
+    { key: 's4', event: 'mix' },
+    { key: 's5', event: 'supplyUp' },
   ];
 
-  // Explore parameter controls
+  // Explore controls: one lever per decision a planner actually makes.
   const PARAM_GROUPS = [
     { key: 'demand', items: [
-      { key: 'demandRate', min: 0.5, max: 1.5, step: 0.05, fmt: (v) => t('pp.fmt.rate', { v: fmt(v, 2) }) },
-      { key: 'cv', min: 0, max: 1, step: 0.05, fmt: (v) => fmt(v, 2) },
-      { key: 'mix', min: 0.1, max: 0.9, step: 0.05, fmt: (v) => t('pp.fmt.mix', { a: pct(v), b: pct(1 - v) }) },
-    ] },
-    { key: 'forecast', items: [
-      { key: 'bias', min: -0.5, max: 0.5, step: 0.05, fmt: (v) => formatNumber(v, { style: 'percent', maximumFractionDigits: 0, signDisplay: 'exceptZero' }) },
-      { key: 'noise', min: 0, max: 0.5, step: 0.05, fmt: (v) => pct(v) },
-    ] },
-    { key: 'capacity', items: [
-      { key: 'capA', min: 0.8, max: 3, step: 0.05, fmt: (v) => t('pp.fmt.rate', { v: fmt(v, 2) }) },
-      { key: 'capB', min: 0.8, max: 3, step: 0.05, fmt: (v) => t('pp.fmt.rate', { v: fmt(v, 2) }) },
-      { key: 'changeover', type: 'switch' },
+      { key: 'cv', min: 0, max: 1, step: 0.1, fmt: (v) => fmt(v, 1) },
     ] },
     { key: 'push', items: [
-      { key: 'period', min: 5, max: 30, step: 5, fmt: (v) => t('pp.fmt.min', { v: fmtInt(v) }) },
       { key: 'safety', min: 0, max: 15, step: 1, fmt: (v) => t('pp.fmt.min', { v: fmtInt(v) }) },
+      { key: 'bias', min: -0.5, max: 0.5, step: 0.05, fmt: (v) => formatNumber(v, { style: 'percent', maximumFractionDigits: 0, signDisplay: 'exceptZero' }) },
     ] },
     { key: 'pull', items: [
-      { key: 'cards0', min: 1, max: 20, step: 1, fmt: (v) => fmtInt(v) },
-      { key: 'cards1', min: 1, max: 20, step: 1, fmt: (v) => fmtInt(v) },
+      { key: 'cardsTotal', min: 2, max: 30, step: 1, fmt: (v) => fmtInt(v) },
     ], note: 'sizing' },
-    { key: 'cost', items: [
-      { key: 'holdCost', min: 0, max: 5, step: 0.5, fmt: (v) => fmt(v, 1) },
-      { key: 'backorderCost', min: 0, max: 20, step: 1, fmt: (v) => fmtInt(v) },
-    ], note: 'cost' },
+    { key: 'supply', items: [
+      { key: 'supplyLead', min: 0, max: 8, step: 1, fmt: (v) => t('pp.fmt.min', { v: fmtInt(v) }) },
+    ], note: 'supply' },
   ];
 
   /* ---------- Formatting ---------- */
@@ -121,15 +113,15 @@
       ${g.note ? `<p class="param-note" id="note-${g.note}"></p>` : ''}
     </div>`).join('');
 
-  $('preset-list').innerHTML = PRESETS.map((p, i) => `
-    <button type="button" class="preset-btn" data-preset="${i}" aria-pressed="false">
-      <span class="preset-btn__key" aria-hidden="true">${i + 1}</span><span data-i18n="pp.${p.key}.name"></span>
+  $('scenario-list').innerHTML = SCENARIOS.map((p, i) => `
+    <button type="button" class="scenario-btn" data-scenario="${i}" aria-pressed="false">
+      <span class="scenario-btn__key" aria-hidden="true">${i + 1}</span><span data-i18n="pp.${p.key}.name"></span>
     </button>`).join('');
 
   const ui = {
     play: $('btn-play'), reset: $('btn-reset'), seed: $('btn-seed'), speed: $('in-speed'), outSpeed: $('out-speed'),
     seedLabel: $('seed-label'), clock: $('clock'), live: $('live-region'), compare: $('compare'),
-    presetBtns: [...document.querySelectorAll('.preset-btn')], presetText: $('preset-text'),
+    scenarioBtns: [...document.querySelectorAll('.scenario-btn')], scenarioWhat: $('scenario-what'), scenarioObs: $('scenario-obs'),
     modeBtns: [...document.querySelectorAll('.mode-switch__btn')],
     explore: $('explore-panel'), game: $('game-panel'), shortcuts: $('shortcuts'),
   };
@@ -156,7 +148,7 @@
   let sim = null;
   let playing = false;
   let speedIndex = Number(ui.speed.value);
-  let presetIdx = 0;
+  let scenarioIdx = 0;
   let mode = 'explore';
   let kpisHidden = false;
   let runTarget = Infinity;
@@ -175,31 +167,41 @@
     return sim;
   }
 
-  function loadPreset(i) {
-    presetIdx = i;
-    newSim(Object.assign(clone(BASE), clone(Object.assign({}, BASE, PRESETS[i].params))));
-    setPreset(i);
+  /** Load a scenario: baseline parameters plus its one disturbance at minute 20. */
+  function loadScenario(i) {
+    const ev = SCENARIOS[i].event;
+    newSim(Object.assign(clone(BASE), { schedule: ev ? [{ t: EVENT_AT, type: ev }] : [] }));
+    setScenario(i);
     syncControls();
   }
 
-  function setPreset(i) {
-    presetIdx = i;
-    ui.presetBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === i)));
-    // Off-preset (a control changed or an event fired): the scenario guidance no longer applies.
-    ui.presetText.textContent = i >= 0 ? t(`pp.${PRESETS[i].key}.obs`) : t('pp.presets.custom');
+  /** Replay the current scenario, keeping the levers the user has set. */
+  function replayScenario() {
+    newSim(clone(params));
+  }
+
+  function setScenario(i) {
+    scenarioIdx = i;
+    ui.scenarioBtns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === i)));
+    ui.scenarioWhat.textContent = t(`pp.${SCENARIOS[i].key}.what`, { m: fmtInt(EVENT_MIN) });
+    ui.scenarioObs.textContent = t(`pp.${SCENARIOS[i].key}.obs`);
+  }
+
+  /** Split a total number of kanban cards between the two SKUs, following the mix. */
+  function splitCards(total, mix) {
+    const a = Math.max(1, Math.min(total - 1, Math.round(total * mix)));
+    return [a, total - a];
   }
 
   function applyParam(key, value) {
-    if (key === 'cards0' || key === 'cards1') {
-      const cards = params.cards.slice();
-      cards[key === 'cards0' ? 0 : 1] = value;
+    if (key === 'cardsTotal') {
+      const cards = splitCards(value, params.mix);
       params.cards = cards;
       sim.setParams({ cards });
     } else {
       params[key] = value;
       sim.setParams({ [key]: value });
     }
-    setPreset(-1);
     syncControls();
   }
 
@@ -365,7 +367,7 @@
     ctx.fillStyle = C.unit;
     ctx.font = `10px ${C.font}`;
     ctx.textBaseline = 'bottom';
-    const fromRm = [g.rm.x + (g.rm.s - U) / 2, cy - U / 2];
+    const fromRm = [g.rm.x + (g.rm.s - U) / 2, cy - U / 2];   // spawn point for units entering the line
     const queue = (q, sg) => {
       const cap = sg.q.rows * sg.q.cols;
       const n = Math.min(q.length, cap);
@@ -383,6 +385,25 @@
         ctx.fillStyle = C.unit;
       }
     };
+    // Orders still at the supplier, stacked inside the dashed supplier box
+    {
+      const cols = Math.max(1, Math.floor((g.rm.s - 4) / step));
+      const rows = Math.max(1, Math.floor((g.rm.s - 4) / step));
+      const x0 = g.rm.x + (g.rm.s - cols * step + g.G) / 2;
+      const y0 = g.rm.y + (g.rm.s - rows * step + g.G) / 2;
+      const cap = cols * rows;
+      const n = Math.min(Ln.inbound.length, cap);
+      for (let j = 0; j < n; j++) {
+        const u = Ln.inbound[j].u;
+        const sp = place(line, u.id, x0 + (j % cols) * step, y0 + Math.floor(j / cols) * step, now, null);
+        drawShape(ctx, u.sku, sp.x, sp.y, U);
+      }
+      if (Ln.inbound.length > cap) {
+        ctx.fillStyle = C.text;
+        ctx.fillText(`+${fmtInt(Ln.inbound.length - cap)}`, g.rm.x, g.rm.y - 2);
+        ctx.fillStyle = C.unit;
+      }
+    }
     queue(Ln.qA, g.a);
     queue(Ln.qB, g.b);
     [g.a, g.b].forEach((sg, i) => {
@@ -567,8 +588,7 @@
   }
 
   function paramValue(key) {
-    if (key === 'cards0') return params.cards[0];
-    if (key === 'cards1') return params.cards[1];
+    if (key === 'cardsTotal') return params.cards[0] + params.cards[1];
     return params[key];
   }
 
@@ -588,11 +608,15 @@
     ui.outSpeed.textContent = sp;
     ui.speed.setAttribute('aria-valuetext', sp);
     setFill(ui.speed);
-    // Kanban sizing rule of thumb: cards ≈ demand × replenishment time + safety (1 unit)
-    const rep = DEFAULTS.cardDelay + 1 / params.capA + 1 / params.capB + 1;
+    // Kanban sizing rule of thumb: cards ≈ demand × replenishment time + 1 unit of safety.
+    // Replenishment time = supplier lead time + both process times + card travel time.
+    const rep = params.supplyLead + 1 / params.capA + 1 / params.capB + DEFAULTS.cardDelay;
     const d = [params.demandRate * params.mix, params.demandRate * (1 - params.mix)];
-    $('note-sizing').textContent = t('pp.note.sizing', { a: fmtInt(Math.ceil(d[0] * rep + 1)), b: fmtInt(Math.ceil(d[1] * rep + 1)), rep: fmt(rep) });
-    $('note-cost').textContent = t('pp.note.cost');
+    const rec = Math.ceil(d[0] * rep + 2) + Math.ceil(d[1] * rep + 2);
+    $('note-sizing').textContent = t('pp.note.sizing', {
+      rep: fmt(rep), rec: fmtInt(rec), a: fmtInt(params.cards[0]), b: fmtInt(params.cards[1]),
+    });
+    $('note-supply').textContent = t('pp.note.supply');
   }
 
   function renderPlay() {
@@ -606,7 +630,7 @@
     ui.shortcuts.innerHTML = t('pp.shortcuts', { space: `<kbd>${esc(t('pp.key.space'))}</kbd>`, r: '<kbd>R</kbd>', keys: '<kbd>1</kbd>–<kbd>5</kbd>' });
     $('learn-icon').innerHTML = icon('chevronDown', { size: 18 });
     ui.modeBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
-    setPreset(ui.presetBtns.findIndex((b) => b.getAttribute('aria-pressed') === 'true'));
+    setScenario(scenarioIdx);
     syncControls();
     renderUi();
     renderLive();
@@ -653,18 +677,17 @@
       game = null;
       kpisHidden = false;
       seed = DEFAULT_SEED;
-      loadPreset(0);
+      loadScenario(0);
     }
     needsLayout = true;
   }
 
   /* ---------- Events ---------- */
   ui.play.addEventListener('click', () => setPlaying(!playing));
-  ui.reset.addEventListener('click', () => { const p = clone(params); newSim(p); });
-  ui.seed.addEventListener('click', () => { seed = 1 + Math.floor(Math.random() * 999999); newSim(clone(params)); });
+  ui.reset.addEventListener('click', replayScenario);
+  ui.seed.addEventListener('click', () => { seed = 1 + Math.floor(Math.random() * 999999); replayScenario(); });
   ui.speed.addEventListener('input', () => { speedIndex = Number(ui.speed.value); syncControls(); });
-  document.querySelectorAll('[data-event]').forEach((b) => b.addEventListener('click', () => { sim.applyEvent(b.dataset.event); setPreset(-1); }));
-  ui.presetBtns.forEach((b, i) => b.addEventListener('click', () => loadPreset(i)));
+  ui.scenarioBtns.forEach((b, i) => b.addEventListener('click', () => loadScenario(i)));
   ui.modeBtns.forEach((b) => b.addEventListener('click', () => { if (b.dataset.mode !== mode) setMode(b.dataset.mode); }));
   PARAM_GROUPS.forEach((g) => g.items.forEach((it) => {
     const el = $(`in-${it.key}`);
@@ -688,9 +711,9 @@
       e.preventDefault();
       setPlaying(!playing);
     } else if (mode === 'explore' && !typing && (e.key === 'r' || e.key === 'R')) {
-      newSim(clone(params));
+      replayScenario();
     } else if (mode === 'explore' && !typing && /^[1-5]$/.test(e.key)) {
-      loadPreset(Number(e.key) - 1);
+      loadScenario(Number(e.key) - 1);
     }
   });
 
@@ -734,7 +757,7 @@
   renderHeader({ variant: 'sim' });
   renderFooter();
   readColors();
-  loadPreset(0);
+  loadScenario(0);
   onLangChange(renderText);
   initI18n();
   const startMode = new URLSearchParams(location.search).get('mode');

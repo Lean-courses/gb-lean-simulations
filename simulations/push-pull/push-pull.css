@@ -125,22 +125,19 @@
 .pp-run { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
 .pp-speed { min-width: 180px; flex: 1 1 180px; max-width: 280px; }
 .pp-meta { margin-left: auto; font-size: var(--font-size-xs); color: var(--color-text-subtle); font-variant-numeric: tabular-nums; }
-.pp-events { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
-.pp-events__btns { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.pp-levers { margin-top: var(--space-5); padding-top: var(--space-5); border-top: 1px solid var(--color-border); }
 .pp-params {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: var(--space-5);
-  margin-top: var(--space-5);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-4);
 }
 .param-group > .eyebrow { margin-bottom: var(--space-3); }
 .param-group .field + .field, .param-group .field + .switch, .param-group .switch + .field { margin-top: var(--space-3); }
 .param-note { margin-top: var(--space-2); font-size: var(--font-size-xs); color: var(--color-text-subtle); }
-.pp-presets { margin-top: var(--space-5); padding-top: var(--space-5); border-top: 1px solid var(--color-border); }
-.preset-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--space-2); margin-top: var(--space-3); }
-.preset-btn {
+.pp-scenarios { margin-top: var(--space-5); padding-top: var(--space-5); border-top: 1px solid var(--color-border); }
+.scenario-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--space-2); margin-top: var(--space-3); }
+.scenario-btn {
   display: flex; align-items: center; gap: var(--space-3);
   min-height: 48px; padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border-strong); border-radius: var(--radius-control);
@@ -148,16 +145,17 @@
   font-size: var(--font-size-sm); font-weight: 700; text-align: left; cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
 }
-.preset-btn:hover { background: var(--navy-050); }
-.preset-btn[aria-pressed="true"] { border-color: var(--color-interactive-strong); background: var(--cyan-050); }
-.preset-btn__key {
+.scenario-btn:hover { background: var(--navy-050); }
+.scenario-btn[aria-pressed="true"] { border-color: var(--color-interactive-strong); background: var(--cyan-050); }
+.scenario-btn__key {
   display: inline-flex; align-items: center; justify-content: center; flex: none;
   width: 24px; height: 24px; border-radius: 4px;
   background: var(--navy-050); color: var(--navy-600); font-size: var(--font-size-xs);
 }
-.preset-btn[aria-pressed="true"] .preset-btn__key { background: var(--color-primary); color: var(--color-on-primary); }
-.preset-observe { margin-top: var(--space-3); padding: var(--space-4); border-radius: var(--radius-control); background: var(--color-surface-muted); border: 1px solid var(--color-border); }
-.preset-observe p:last-child { color: var(--color-text-muted); max-width: 80ch; }
+.scenario-btn[aria-pressed="true"] .scenario-btn__key { background: var(--color-primary); color: var(--color-on-primary); }
+.scenario-box { margin-top: var(--space-3); padding: var(--space-4); border-radius: var(--radius-control); background: var(--color-surface-muted); border: 1px solid var(--color-border); }
+.scenario-box p { max-width: 80ch; }
+.scenario-box p:last-child { margin-top: var(--space-2); color: var(--color-text-muted); }
 
 /* ---------- Game panel ---------- */
 .game-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2) var(--space-4); }

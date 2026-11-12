@@ -17,20 +17,20 @@ const SEEDS = [20240601, 7, 3, 11];
 /* 1. Pull never exceeds its cards per SKU; WIP + FG + cards in transit = cards. */
 {
   let maxOver = -Infinity;
-  const s = new PushPullSim({ seed: 5, cards: [4, 3], cv: 1, demandRate: 1.3 });
+  const s = new PushPullSim({ seed: 5, cards: [4, 3], cv: 1, demandRate: 1.3, supplyLead: 2 });
   for (let i = 0; i < 4000; i++) {
     s.advance(0.05);
     const L = s.lines.pull;
     for (let k = 0; k < 2; k++) maxOver = Math.max(maxOver, L.wip(k) + L.fgCount(k) - L.cards[k]);
   }
-  check('Pull: WIP + FG per SKU never exceeds its cards', maxOver <= 0, `max excess ${maxOver} over 200 min, CV 1`);
+  check('Pull: WIP + FG per SKU never exceeds its cards', maxOver <= 0, `max excess ${maxOver} over 200 min, CV 1, supplier lead 2 min`);
 
   // Changing cards mid-run: lowering cards never destroys units; the surplus only
   // drains (its cards retire on return), so held units never exceed cards + retiring.
   let ok = true;
   let conserved = true;
   let drained = false;
-  const c = new PushPullSim({ seed: 5, cards: [4, 3], cv: 1, demandRate: 1.3 });
+  const c = new PushPullSim({ seed: 5, cards: [4, 3], cv: 1, demandRate: 1.3, supplyLead: 2 });
   for (let i = 0; i < 6000; i++) {
     if (i === 2000) c.setParams({ cards: [2, 6] });
     if (i === 4000) c.setParams({ cards: [7, 1] });
@@ -65,7 +65,7 @@ const SEEDS = [20240601, 7, 3, 11];
 
 /* 3. Zero forecast error and CV = 0 → both lines serve 100% of demand immediately. */
 {
-  const s = new PushPullSim({ cv: 0, bias: 0, noise: 0 });
+  const s = new PushPullSim({ cv: 0, bias: 0, noise: 0, supplyLead: 0 });
   s.advance(300);
   const m = s.metrics();
   check('CV 0 + perfect forecast: push fill rate 100%', m.push.fillRate === 1, pct(m.push.fillRate));
@@ -116,25 +116,46 @@ for (const seed of SEEDS.slice(0, 3)) {
     `wrong-mix ${P.wrongMix.toFixed(2)} vs ${Q.wrongMix.toFixed(2)}, SKU 2 backorders +${addPush} vs +${addPull}`);
 }
 
-/* 8. Scheduled events fire at the given time and spikes end after 10 minutes. */
+/* 8. Scheduled events fire at the given time and stay in force until 'baseline'. */
 {
-  const s = new PushPullSim({ schedule: [{ t: 12, type: 'spike' }] });
+  const s = new PushPullSim({ schedule: [{ t: 12, type: 'demandUp' }, { t: 40, type: 'baseline' }] });
   s.advance(11.9);
   const before = s.rateFactor;
   s.advance(0.2);
   const during = s.rateFactor;
+  s.advance(20);
+  const still = s.rateFactor;
   s.advance(10);
-  check('Events: spike starts on schedule (+50%) and ends after 10 min', before === 1 && during === 1.5 && s.rateFactor === 1 && s.events[0].t === 12);
+  check('Events: demandUp starts on schedule, stays in force and baseline undoes it',
+    before === 1 && during === 1.3 && still === 1.3 && s.rateFactor === 1 && s.events[0].t === 12);
+
+  const m = new PushPullSim({ schedule: [{ t: 5, type: 'mix' }, { t: 9, type: 'supplyUp' }] });
+  m.advance(10);
+  check('Events: mix and supplyUp change the mix and the supplier lead time',
+    m.mixNow === 0.3 && m.params.supplyLead === 5, `mix ${m.mixNow}, lead ${m.params.supplyLead} min`);
 }
 
-/* 9. Changeover time lengthens lead time. */
+/* 9. Supplier lead time delays released units and lengthens lead time on both lines. */
 {
-  const a = new PushPullSim({ seed: 2 });
-  const b = new PushPullSim({ seed: 2, changeover: true });
+  const a = new PushPullSim({ seed: 2, supplyLead: 0 });
+  const b = new PushPullSim({ seed: 2, supplyLead: 4 });
   a.advance(200);
   b.advance(200);
-  check('Changeover: enabling it increases push lead time', b.metrics().push.leadTime > a.metrics().push.leadTime,
-    `${f1(a.metrics().push.leadTime)} → ${f1(b.metrics().push.leadTime)} min`);
+  const ma = a.metrics();
+  const mb = b.metrics();
+  check('Supplier lead time: a longer lead time raises push lead time by about the delay',
+    mb.push.leadTime - ma.push.leadTime > 3, `${f1(ma.push.leadTime)} → ${f1(mb.push.leadTime)} min`);
+  check('Supplier lead time: with cards unchanged, a longer lead time hurts the pull fill rate',
+    mb.pull.fillRate < ma.pull.fillRate - 0.05, `${pct(ma.pull.fillRate)} → ${pct(mb.pull.fillRate)}`);
+
+  // A released unit waits at the supplier and counts as WIP in the meantime.
+  const c = new PushPullSim({ seed: 2, supplyLead: 4, autoRelease: false });
+  c.lines.push.manualRelease([2, 0], c.t);
+  c.advance(3);
+  const waiting = c.lines.push.inbound.length === 2 && c.lines.push.qA.length === 0 && c.lines.push.wip(0) === 2;
+  c.advance(2);
+  check('Supplier lead time: units reach Process A only after the lead time',
+    waiting && c.lines.push.inbound.length === 0, `inbound ${c.lines.push.inbound.length}`);
 }
 
 /* 10. Manual release (Game mode): no automatic MRP releases. */

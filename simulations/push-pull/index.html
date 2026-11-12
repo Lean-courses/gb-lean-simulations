@@ -71,26 +71,21 @@
         <p class="pp-meta" id="seed-label"></p>
       </div>
 
-      <div class="pp-events">
-        <p class="eyebrow" id="events-label" data-i18n="pp.events.title"></p>
-        <div class="pp-events__btns" role="group" aria-labelledby="events-label">
-          <button type="button" class="btn" data-event="spike" data-i18n="pp.events.spike"></button>
-          <button type="button" class="btn" data-event="drop" data-i18n="pp.events.drop"></button>
-          <button type="button" class="btn" data-event="mix" data-i18n="pp.events.mix"></button>
-          <button type="button" class="btn" data-event="baseline" data-i18n="pp.events.baseline"></button>
+      <div class="pp-scenarios">
+        <h2 class="section-title" id="scenarios-title" data-i18n="pp.scenarios.title"></h2>
+        <p class="node-hint" data-i18n="pp.scenarios.hint"></p>
+        <div class="scenario-list" id="scenario-list" role="group" aria-labelledby="scenarios-title"></div>
+        <div class="scenario-box">
+          <p class="eyebrow" data-i18n="pp.scenarios.observe"></p>
+          <p id="scenario-what"></p>
+          <p id="scenario-obs"></p>
         </div>
       </div>
 
-      <div class="pp-params" id="params"></div>
-
-      <div class="pp-presets">
-        <h2 class="section-title" id="presets-title" data-i18n="pp.presets.title"></h2>
-        <p class="node-hint" data-i18n="pp.presets.hint"></p>
-        <div class="preset-list" id="preset-list" role="group" aria-labelledby="presets-title"></div>
-        <div class="preset-observe">
-          <p class="eyebrow" data-i18n="pp.presets.observe"></p>
-          <p id="preset-text"></p>
-        </div>
+      <div class="pp-levers">
+        <h2 class="section-title" data-i18n="pp.levers.title"></h2>
+        <p class="node-hint" data-i18n="pp.levers.hint"></p>
+        <div class="pp-params" id="params"></div>
       </div>
       <p class="hint" id="shortcuts"></p>
     </section>
