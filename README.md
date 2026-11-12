@@ -8,7 +8,7 @@ A hub of small, interactive simulations that make core Lean Six Sigma concepts v
 | **Little's Law: 3-process line** | WIP = Throughput × Lead time, how each term is measured, bottlenecks and overload |
 | **Push vs. Pull: planning game** | Forecast-driven (MRP) vs. kanban release, card sizing; five named scenarios (stable demand, demand surge, demand drop, mix shift, slower supplier) and a 6-round classroom game with facilitator seed |
 
-**Live site:** https://drotondi.github.io/GreenBelt/
+**Live site:** https://lean-simulations.vercel.app/
 
 - Pure static site: vanilla HTML, CSS and JavaScript. No frameworks, no build step, no npm.
 - Runs by double-clicking `index.html`: no server, no installation.
