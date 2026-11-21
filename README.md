@@ -34,6 +34,10 @@ Run it from the repository root, then open http://localhost:8000/.
 
 Browsers block ES modules on `file://`, so all JavaScript uses classic `<script defer>` tags and a single global namespace, `window.LSS` (`LSS.config`, `LSS.i18n`, `LSS.icons`, `LSS.motion`, `LSS.header`, `LSS.registry`, `LSS.sim`). Script order in each page matters. Links always point to an explicit `index.html`, because folder links do not open `index.html` from disk.
 
+## Link back to the landing
+
+The hub header carries a "Back to the Green Belt program" link above the title (EN / ES / PT). It opens in the same window, with no `target`. Its address is one constant, `LANDING_URL` in `shared/config.js`; leave it empty to hide the link. The simulations keep their own "← Home" link to the hub and do not show it.
+
 ## Brand assets flag
 
 `shared/config.js`:

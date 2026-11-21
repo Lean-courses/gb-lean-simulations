@@ -119,6 +119,9 @@ a { color: var(--color-link); }
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 .back-link:hover { background: var(--navy-050); }
+.back-link--landing { margin-bottom: var(--space-2); line-height: 1.25; text-wrap: balance; }
+/* Next to the language switch there is little width on a phone: let a long
+   label break evenly instead of leaving one word alone on the second line. */
 
 .accent-bar { height: var(--accent-bar-height); background: var(--gradient-signature); }
 
