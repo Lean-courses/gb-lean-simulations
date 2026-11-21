@@ -3,96 +3,98 @@
  * Every color, radius, shadow and motion value used by the hub and its
  * simulations comes from here. Canvas code reads these via getComputedStyle.
  *
- * Palette: green, slate grey and white. Green carries interaction and the
- * "good" status; the greys carry everything else. Data is deliberately slate,
- * not green, so a chart never competes with a button for the reader's eye and
- * "this is the better line" stays the only green thing on a canvas.
+ * Palette: antique ivory, piano black and turquoise, the same as the landing
+ * page (60 / 30 / 10). Ivory is the page, black is text and ink, turquoise is
+ * the accent. Data is deliberately a warm dark grey, not turquoise, so a chart
+ * never competes with a button for the reader's eye.
  *
- * Contrast measured against white / #fafafa page / #f0f4f8 band:
- *   ink 14.5 / 13.9 / 13.1      muted 7.5 / 7.2 / 6.8
- *   subtle 4.9 / 4.7 / 4.4      link green 5.0 / 4.8 / 4.5
- * The vivid green is a fill, never text: white on it is 2.1:1, so the primary
- * button carries ink text instead (6.9:1).
+ * Turquoise on ivory is 1.76:1, unreadable as text, so the vivid turquoise is
+ * a fill and never a word: the primary button is turquoise with black text
+ * (8.2:1) and a deeper turquoise, #006b63 (5.0:1), is the one used for links
+ * and icons. Contrast measured against ivory / card / light ivory:
+ *   ink 14.3 / 16.3 / 15.4     muted 6.4 / 7.2 / 7.1
+ *   subtle 4.6 / 5.5 / 5.2     link teal 5.0 / 5.9 / 5.6
  */
 :root {
   /* Brand */
-  --brand-ink: #032c46;           /* deep slate, 14.5:1 on white */
-  --brand-accent: #10cd73;        /* vivid green — fills and marks, never text */
-  --brand-accent-deep: #078049;   /* the green that is safe as text, 5.0:1 */
-  --brand-accent-dark: #065f3c;   /* pressed states, white text 7.8:1 */
-  --brand-accent-soft: #eafaf2;
+  --brand-ink: #151515;           /* piano black, 14.3:1 on ivory */
+  --brand-accent: #00c2b5;        /* turquoise — fills and marks, never text on ivory */
+  --brand-accent-deep: #006b63;   /* the turquoise that is safe as text, 5.0:1 */
+  --brand-accent-dark: #00524b;   /* pressed states, ivory text 8.9:1 */
+  --brand-accent-soft: #d5eae0;
 
   /* Kept as aliases: older code and canvases still reference these names.
-     Note --amcor-cyan is the DATA hue and is slate, not green, on purpose. */
+     Note --amcor-cyan is the DATA hue and is a warm grey, not turquoise, on
+     purpose. */
   --amcor-navy: var(--brand-ink);
   --amcor-cyan: var(--navy-600);
   --amcor-teal: var(--navy-500);
   --amcor-green: var(--color-success);
   --amcor-gradient-stop: var(--brand-accent);
 
-  /* Ink / slate ramp */
-  --navy-900: #021c2d;
-  --navy-800: #032c46;
-  --navy-700: #0f3c55;
-  --navy-600: #3e5868;
-  --navy-500: #5c7484;
-  --navy-200: #c6d2da;
-  --navy-100: #dfe8ee;
-  --navy-050: #f0f4f8;
+  /* Ink ramp (black to warm grey) */
+  --navy-900: #0d0d0d;
+  --navy-800: #151515;
+  --navy-700: #2e2c27;
+  --navy-600: #54503f;
+  --navy-500: #6b6455;
+  --navy-200: #cdbf9f;
+  --navy-100: #e0d4b8;
+  --navy-050: #f6f0e1;
 
-  /* Accent ramp (green) */
-  --cyan-700: #065f3c;
-  --cyan-600: #078049;
-  --cyan-500: #10cd73;
-  --cyan-300: #6fe0ac;
-  --cyan-100: #d7f6e6;
-  --cyan-050: #eafaf2;
+  /* Accent ramp (turquoise) */
+  --cyan-700: #00524b;
+  --cyan-600: #006b63;
+  --cyan-500: #00c2b5;
+  --cyan-300: #66dad2;
+  --cyan-100: #bfe3d9;
+  --cyan-050: #d5eae0;
 
-  /* Cool neutrals */
-  --neutral-0: #ffffff;
-  --neutral-25: #fafafa;
-  --neutral-50: #f5f8fa;
-  --neutral-100: #e6ecf0;
-  --neutral-200: #d7dfe5;
-  --neutral-300: #b9c4cb;
-  --neutral-400: #8fa3ae;
-  --neutral-500: #5c7484;
-  --neutral-600: #3e5868;
-  --neutral-700: #0f3c55;
+  /* Warm neutrals */
+  --neutral-0: #fbf8f0;
+  --neutral-25: #eee3cc;
+  --neutral-50: #f6f0e1;
+  --neutral-100: #dccfb2;
+  --neutral-200: #c9ba97;
+  --neutral-300: #b3a583;
+  --neutral-400: #8c8068;
+  --neutral-500: #6b6455;
+  --neutral-600: #54503f;
+  --neutral-700: #2e2c27;
 
   /* Signature gradient — accents only, never behind body text */
-  --gradient-signature: linear-gradient(90deg, #10cd73 0%, #078049 55%, #0f3c55 100%);
+  --gradient-signature: linear-gradient(90deg, #00c2b5 0%, #006b63 55%, #2e2c27 100%);
 
   /* Semantic roles */
-  --color-bg: var(--neutral-25);
-  --color-surface: var(--neutral-0);
+  --color-bg: var(--neutral-25);            /* ivory: the page */
+  --color-surface: var(--neutral-0);        /* almost-white ivory: cards, canvases */
   --color-surface-muted: var(--neutral-50);
   --color-text: var(--brand-ink);
-  --color-text-muted: var(--neutral-600);   /* 7.5:1 on white */
-  --color-text-subtle: var(--neutral-500);  /* 4.9:1 on white, 4.7:1 on bg */
+  --color-text-muted: var(--neutral-600);   /* 7.2:1 on card */
+  --color-text-subtle: var(--neutral-500);  /* 5.5:1 on card, 4.6:1 on ivory */
   --color-border: var(--neutral-100);
   --color-border-strong: var(--neutral-200);
   --color-interactive: var(--brand-accent-deep);
   --color-interactive-strong: var(--brand-accent-dark); /* non-text UI */
-  --color-link: var(--brand-accent-deep);      /* text, 5.0:1 on white */
+  --color-link: var(--brand-accent-deep);      /* text, 5.9:1 on card */
   --color-focus: var(--brand-accent-deep);
   --color-primary: var(--brand-accent);        /* fill */
-  --color-primary-hover: #0ea55e;              /* ink on it still 4.5:1 */
-  --color-on-primary: var(--brand-ink);        /* 6.9:1 on the vivid green */
+  --color-primary-hover: #00a89d;              /* black on it still 6.2:1 */
+  --color-on-primary: var(--brand-ink);        /* 8.2:1 on the turquoise */
 
-  /* Status colors — reserved meanings, never decorative. In a green brand
-     "good" shares the brand hue by design, but it is a darker value than the
-     CTA green and it is the only green allowed on a canvas. Amber and magenta
-     stay off-brand so three states never blur into one another.
-     Measured on white: amber 4.2:1 (outlines, markers and icons only — put the
-     label text in ink), green 5.4:1 and magenta 7.6:1 (both safe as text). */
-  --color-bottleneck: #b46a00;   /* amber */
-  --color-success: #077a46;      /* green, darker than the CTA fill */
+  /* Status colors — reserved meanings, never decorative. "Good" is a leaf
+     green on purpose: a green close to the turquoise brand (the old one was
+     23 degrees away) would be confused with selected controls. Amber and
+     magenta stay off-brand so the three states never blur into one another.
+     Measured on card: amber 4.7:1 (outlines, markers and icons only -- put
+     the label text in ink), leaf green 5.0:1 and magenta 7.1:1. */
+  --color-bottleneck: #a35f00;   /* amber */
+  --color-success: #3b7a1e;      /* leaf green, 74 degrees from the turquoise */
   --color-danger: #a8004f;       /* magenta: the one hue no chrome uses */
-  --color-danger-tint: #fbe6ef;
+  --color-danger-tint: #f7e2e8;
 
   /* Simulation palette. Three separable roles, not one accent repeated:
-     pegs and floor are grey furniture, the balls are the accent, and the
+     pegs and floor are warm grey furniture, the balls are the accent, and the
      theoretical curve is ink so it reads as a reference, not as data. */
   --sim-peg: var(--neutral-200);
   --sim-ball: var(--brand-accent);
@@ -103,9 +105,9 @@
   --sim-divider: var(--neutral-200);
   --sim-floor: var(--neutral-200);
   --sim-label: var(--neutral-500);
-  --sim-gradient-0: #10cd73;
-  --sim-gradient-50: #078049;
-  --sim-gradient-100: #0f3c55;
+  --sim-gradient-0: #00c2b5;
+  --sim-gradient-50: #006b63;
+  --sim-gradient-100: #2e2c27;
 
   /* Typography — one typeface */
   --font-family-fallback: Arial, Helvetica, sans-serif;
@@ -137,8 +139,8 @@
   --radius-chip: 4px;
 
   /* Elevation */
-  --shadow-card: 0 8px 24px rgba(3, 44, 70, 0.07);
-  --shadow-card-hover: 0 12px 28px rgba(3, 44, 70, 0.12);
+  --shadow-card: 0 8px 24px rgba(21, 21, 21, 0.08);
+  --shadow-card-hover: 0 12px 28px rgba(21, 21, 21, 0.13);
 
   /* Motion */
   --ease-standard: cubic-bezier(.2, 0, .2, 1);
