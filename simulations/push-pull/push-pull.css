@@ -84,7 +84,7 @@
   padding: 1px 6px;
   border-radius: 10px;
   background: var(--color-danger);
-  color: var(--color-on-primary);
+  color: var(--neutral-0);   /* not on-primary: that is black now, 2.4:1 on magenta */
   font-size: var(--font-size-xs);
   font-weight: 700;
   text-align: center;

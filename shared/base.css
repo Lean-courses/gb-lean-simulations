@@ -365,7 +365,7 @@ input[type="range"]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(
   width: 16px; height: 16px;
   border-radius: 50%;
   background: var(--color-surface);
-  box-shadow: 0 1px 2px rgba(0, 57, 90, 0.2);
+  box-shadow: 0 1px 2px rgba(21, 21, 21, 0.22);
   transition: transform var(--duration-base) var(--ease-standard);
 }
 .switch input:checked { background: var(--color-interactive-strong); }

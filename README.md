@@ -1,6 +1,6 @@
 # Lean Six Sigma simulations
 
-A hub of small, interactive simulations that make core Lean Six Sigma concepts visible, styled with the Amcor visual identity.
+A hub of small, interactive simulations that make core Lean Six Sigma concepts visible, in the same ivory, black and turquoise palette as the Green Belt landing page.
 
 | Simulation | Concept |
 |---|---|
@@ -60,7 +60,14 @@ simulations/push-pull/     Push vs. Pull simulation (engine.js model, game.js ro
 simulations/_template/     Copyable skeleton (status "draft", hidden from Home)
 ```
 
-All colors, radii, shadows and motion values live in `shared/tokens.css`. Status colors have reserved meanings: orange = bottleneck, green = verified, magenta = unstable.
+All colors, radii, shadows and motion values live in `shared/tokens.css`.
+
+**Palette** (60 / 30 / 10, shared with the landing): antique ivory `#eee3cc` is the page, piano black `#151515` is text, and turquoise `#00c2b5` is the accent. Cards and canvases sit on a lighter ivory, `#fbf8f0`.
+
+- **Turquoise is a fill, never text on ivory.** It is 1.76:1 there. The primary button is turquoise with black text (8.2:1); links and icons use a deeper turquoise, `#006b63` (5.0:1).
+- **Data is a warm dark grey, not turquoise**, so a chart never competes with a button. The canvases read their colors through `getComputedStyle`, so changing a token repaints every simulation. The five thumbnails are the exception: they load as `<img>`, cannot read the page's custom properties and carry their own hex values.
+- **Status colors have reserved meanings** and are deliberately not pulled toward the brand: amber = bottleneck, leaf green = verified, magenta = unstable. "Verified" is a leaf green (`#3b7a1e`) on purpose; a green close to the turquoise would be confused with selected controls.
+- Do not use `--color-on-primary` as text on a status color: it is black, which is 2.4:1 on magenta. Use `--neutral-0`.
 
 ## Tests
 
