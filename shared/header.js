@@ -2,13 +2,13 @@
  * Shared page chrome: header (title, back-to-home link, EN|ES|PT switcher),
  * signature accent bar and footer. All text comes from shared i18n keys.
  *
- *   renderHeader({ variant: 'home' })  → hub title + subtitle
+ *   renderHeader({ variant: 'home' })  → link back to the landing + hub title + subtitle
  *   renderHeader({ variant: 'sim' })   → "← Home" link + hub name
  */
 (function (LSS) {
   'use strict';
 
-  const { USE_BRAND_ASSETS, ROOT_URL, BRAND_ASSETS } = LSS.config;
+  const { USE_BRAND_ASSETS, ROOT_URL, BRAND_ASSETS, LANDING_URL } = LSS.config;
   const { SUPPORTED_LANGS, getLang, setLang, onLangChange } = LSS.i18n;
   const { icon } = LSS.icons;
 
@@ -43,6 +43,14 @@
     return `<div class="lang-switch" role="group" data-i18n-attr="aria-label:lang.label">${buttons}</div>`;
   }
 
+  /** Link back to the Green Belt landing. Same window on purpose: no target. */
+  function landingLinkMarkup() {
+    if (!LANDING_URL) return '';
+    return `<a class="back-link back-link--landing" href="${LANDING_URL}">
+               ${icon('arrowLeft', { size: 18 })}<span data-i18n="nav.landing"></span>
+             </a>`;
+  }
+
   function renderHeader({ variant = 'home' } = {}) {
     applyBrandAssets();
     const el = document.getElementById('site-header');
@@ -51,6 +59,7 @@
     const start =
       variant === 'home'
         ? `<div class="site-header__titles">
+             ${landingLinkMarkup()}
              <div class="brand">${logoMarkup()}<h1 class="site-header__title" data-i18n="hub.title"></h1></div>
              <p class="site-header__subtitle" data-i18n="hub.subtitle"></p>
            </div>`
